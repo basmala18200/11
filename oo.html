@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة أجزاء الزهرة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            direction: rtl;
+        }
+        .question {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .choices {
+            margin-top: 20px;
+        }
+        .choice {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .choice:hover {
+            background-color: #e0e0e0;
+        }
+        .correct {
+            background-color: #90ee90;
+        }
+        .incorrect {
+            background-color: #ffcccb;
+        }
+        #nextButton, #restartButton {
+            display: none;
+            margin-top: 20px;
+        }
+        #timer {
+            font-size: 20px;
+            color: red;
+            margin-top: 20px;
+        }
+        #score {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        #flowerImage {
+            width: 300px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>لعبة أجزاء الزهرة</h1>
+    <p>اختر الجزء الصحيح من الزهرة بناءً على الوصف.</p>
+
+    <!-- صورة الزهرة -->
+    <img id="flowerImage" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiuAAqhQLllE5c2WtrFbnfJEXOXSGH6K9SyfBUeQ03m84Qq3qtUj7qpqSUah5UWzKBEX3IYrNE8sZYe8g8EgoU0GRo6a1Ghrb7KqVnPNXE8XA7F8Yh_a_pnScM3lGInGN5cV-KAsbtqJDot/s1600/%D8%A7%D9%84%D8%B2%D9%87%D8%B1%D8%A9%20%D9%88%D9%85%D9%83%D9%88%D9%86%D8%A7%D8%AA%D9%87%D8%A7.jpg" alt="صورة زهرة">
+
+    <div id="timer">الوقت المتبقي: <span id="timeRemaining">30</span> ثانية</div>
+    <div id="questionContainer">
+        <div class="question" id="questionText">ما هو الجزء الذكري والمسؤول عن التكاثر في النباتات؟</div>
+        <div class="choices">
+            <div class="choice" onclick="checkAnswer('sadaa', this)">السداة</div>
+            <div class="choice" onclick="checkAnswer('awraq_kas', this)">أوراق الكأس</div>
+            <div class="choice" onclick="checkAnswer('awraq_towij', this)">أوراق التويج</div>
+            <div class="choice" onclick="checkAnswer('madqa', this)">المدقة</div>
+            <div class="choice" onclick="checkAnswer('flower', this)">الزهرة</div> <!-- إضافة خيار الزهرة -->
+        </div>
+    </div>
+
+    <button id="nextButton" onclick="nextQuestion()">السؤال التالي</button>
+    <button id="restartButton" onclick="restartGame()">محاولة أخرى</button>
+
+    <div id="score"></div>
+
+    <!-- تأثيرات صوتية -->
+    <audio id="correctSound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+    <audio id="incorrectSound" src="https://www.soundjay.com/button/beep-08b.wav"></audio>
+    <audio id="gameOverSound" src="https://www.soundjay.com/button/button-29.wav"></audio>
+
+    <script>
+        let currentQuestion = 0;
+        let correctAnswers = 0;
+        let timer;
+        let timeRemaining = 30; // تم تغيير الوقت إلى 30 ثانية
+
+        const questions = [
+            {
+                question: "ما هو الجزء الذكري والمسؤول عن التكاثر في النباتات؟",
+                correctAnswer: "sadaa"
+            },
+            {
+                question: "الأجزاء الخضراء الخارجية التي تحمي الزهرة والأعضاء الداخلية؟",
+                correctAnswer: "awraq_kas"
+            },
+            {
+                question: "الأجزاء الملونة من الزهرة التي تساعد في جذب الحشرات والملقحات؟",
+                correctAnswer: "awraq_towij"
+            },
+            {
+                question: "الجزء الأنثوي المسؤول عن إنتاج البذور؟",
+                correctAnswer: "madqa"
+            },
+            {
+                question: "من هو الجزء المسؤول عن التكاثر في النبتة؟",
+                correctAnswer: "flower"
+            }
+        ];
+
+        function startTimer() {
+            timer = setInterval(function() {
+                timeRemaining--;
+                document.getElementById("timeRemaining").textContent = timeRemaining;
+                if (timeRemaining <= 0) {
+                    clearInterval(timer);
+                    nextQuestion();
+                }
+            }, 1000);
+        }
+
+        function checkAnswer(selected, element) {
+            const current = questions[currentQuestion];
+            const choices = document.querySelectorAll('.choice');
+
+            // تعطيل الاختيارات بعد الإجابة
+            choices.forEach(choice => {
+                choice.style.pointerEvents = 'none';
+            });
+
+            // التحقق إذا كانت الإجابة صحيحة
+            if (selected === current.correctAnswer) {
+                element.classList.add('correct');
+                correctAnswers++;
+                document.getElementById('correctSound').play(); // تشغيل صوت الإجابة الصحيحة
+            } else {
+                element.classList.add('incorrect');
+                document.getElementById('incorrectSound').play(); // تشغيل صوت الإجابة الخاطئة
+            }
+
+            // إظهار زر السؤال التالي
+            document.getElementById('nextButton').style.display = 'inline';
+            clearInterval(timer); // إيقاف التايمر بعد الإجابة
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showScore();
+            }
+        }
+
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionText').textContent = question.question;
+            const choices = document.querySelectorAll('.choice');
+            choices.forEach(choice => {
+                choice.classList.remove('correct', 'incorrect');
+                choice.style.pointerEvents = 'auto'; // تمكين الاختيارات مرة أخرى
+            });
+            document.getElementById('nextButton').style.display = 'none';
+
+            timeRemaining = 30; // إعادة تعيين الوقت إلى 30 ثانية
+            document.getElementById("timeRemaining").textContent = timeRemaining;
+            startTimer(); // بدء التايمر
+        }
+
+        function showScore() {
+            document.getElementById('score').textContent = `لقد أجبت بشكل صحيح على ${correctAnswers} من أصل ${questions.length} أسئلة!`;
+            document.getElementById('nextButton').style.display = 'none';
+            document.getElementById('restartButton').style.display = 'inline';
+            document.getElementById('gameOverSound').play(); // تشغيل صوت اللعبة المنتهية
+            alert("تهانينا! انتهيت من اللعبة.");
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            correctAnswers = 0;
+            document.getElementById('restartButton').style.display = 'none';
+            loadQuestion();
+        }
+
+        window.onload = loadQuestion;
+    </script>
+
+</body>
+</html>
